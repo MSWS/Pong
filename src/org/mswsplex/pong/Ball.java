@@ -95,14 +95,6 @@ public class Ball {
 				historyX.remove(i);
 				historyY.remove(i);
 			}
-
-		for (int i = historyX.size() - 1; i >= 0; i--) {
-			if (historyX.get(i) == 0)
-				continue;
-//
-//			historyX.set(i, (int) ((historyX.get(i) + xVel) * 1.01));
-//			historyY.set(i, (int) ((historyY.get(i) + yVel) * .99));
-		}
 	}
 
 	public boolean checkCollision(Set<Paddle> paddles) {
@@ -136,9 +128,6 @@ public class Ball {
 			pY = historyY.get(i - 1);
 			g.setColor(new Color((int) (((double) i / historyX.size()) * 255),
 					(int) (((double) i / historyX.size()) * 255), (int) (((double) i / historyX.size()) * 255)));
-			// g.fillRect(historyX.get(i) + this.getWidth() / 2, historyY.get(i) +
-			// this.getHeight() / 2, 1, 1);
-
 			g.drawLine(pX + this.getWidth() / 2, pY + this.getHeight() / 2, historyX.get(i) + this.getWidth() / 2,
 					historyY.get(i) + this.getHeight() / 2);
 		}

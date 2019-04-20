@@ -3,6 +3,7 @@ package org.mswsplex.pong;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class AI extends Paddle {
 
@@ -14,12 +15,15 @@ public class AI extends Paddle {
 
 	private boolean onRight;
 
-	public AI(Color color, int x, Ball ball, boolean onRight, int minX, int maxX) {
+	private double skill; // 0-1 inclusive
+
+	public AI(Color color, int x, Ball ball, boolean onRight, int minX, int maxX, double skill) {
 		super(color, x);
 		this.ball = ball;
 		this.minX = minX;
 		this.maxX = maxX;
 		this.onRight = onRight;
+		this.skill = skill;
 
 		prevY = new ArrayList<>();
 	}
@@ -27,13 +31,15 @@ public class AI extends Paddle {
 	@Override
 	public void move() {
 
-		double estY = ball.getY(), tmpX = ball.getX(), tmpY = ball.getY(), tmpVX = ball.getXVel() * 10,
-				tmpVY = ball.getYVel() * 10;
+		double estY = ball.getY(), tmpX = ball.getX(), tmpY = ball.getY(),
+				tmpVX = ball.getXVel() * (10 + ((1 - skill) * 10)), tmpVY = ball.getYVel() * (10 + ((1 - skill) * 10));
 
 		boolean est = false;
 
+		ThreadLocalRandom rnd = ThreadLocalRandom.current();
+
 		int amo = 0;
-		while (!est && amo < 50) {
+		while (!est && amo < 100) {
 			if (onRight) {
 				if (tmpX >= this.getX() - ball.getWidth()) {
 					estY = tmpY;
@@ -60,8 +66,8 @@ public class AI extends Paddle {
 				tmpVY = -tmpVY;
 			}
 
-			tmpX += tmpVX;
-			tmpY += tmpVY;
+			tmpX += tmpVX + rnd.nextDouble((-(1 - skill)) * 5, (1.01 - skill) * 5);
+			tmpY += tmpVY + rnd.nextDouble((-(1 - skill)) * 5, (1.01 - skill) * 5);
 			amo++;
 		}
 
@@ -70,7 +76,7 @@ public class AI extends Paddle {
 
 		prevY.add(estY);
 
-		int avgSize = 50;
+		int avgSize = (int) (50 - ((1 - skill) * 45));
 
 		if (prevY.size() > avgSize)
 			for (int i = 0; i < avgSize && i < prevY.size(); i++) {
@@ -86,17 +92,21 @@ public class AI extends Paddle {
 
 		double dist = Math.abs(getY() - avgY);
 
-		if (dist > 5) {
+		if (dist > 5 + (1 - skill) * 50.0) {
 			if (getY() > avgY) {
-				setYVel(-3);
+				setYVel((float) (-3 - (skill * 2.5)));
 			} else {
-				setYVel(3);
+				setYVel((float) (3 + (skill * 2.5)));
 			}
 		} else {
 			setYVel(0);
 		}
 
 		super.move();
+	}
+
+	public double getSkill() {
+		return this.skill;
 	}
 
 }

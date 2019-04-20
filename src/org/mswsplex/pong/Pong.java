@@ -48,9 +48,13 @@ public class Pong extends Applet implements Runnable, KeyListener {
 		ball = new Ball(Color.GREEN, 20, 20);
 
 		// hPaddle = new Paddle(Color.WHITE, 950);
-		hPaddle = new AI(Color.WHITE, 950, ball, true, 50, 950);
+		// hPaddle = new AI(Color.WHITE, 950, ball, true, 50, 950,
+		// Math.round(rnd.nextDouble() * 1000.0) / 1000.0);
+		// cPaddle = new AI(Color.WHITE, 50, ball, false, 50, 950,
+		// Math.round(rnd.nextDouble() * 1000.0) / 1000.0);
 
-		cPaddle = new AI(Color.WHITE, 50, ball, false, 50, 950);
+		hPaddle = new AI(Color.WHITE, 950, ball, true, 50, 950, 1);
+		cPaddle = new AI(Color.WHITE, 50, ball, false, 50, 950, 1);
 
 		paddles.add(cPaddle);
 		paddles.add(hPaddle);
@@ -85,7 +89,7 @@ public class Pong extends Applet implements Runnable, KeyListener {
 
 		int sm = manageTextAndScores(gfx);
 		if (sm != 0) {
-			status = Status.SCORE;
+			// status = Status.SCORE;
 			hits = 0;
 			resetPositions();
 			winner = sm;
@@ -119,9 +123,16 @@ public class Pong extends Applet implements Runnable, KeyListener {
 		g.setColor(Color.WHITE);
 
 		g.drawString("P1 Score: " + p1Score, 50, 40);
-		g.drawString("P2 Score: " + p2Score, 800, 40);
+		g.drawString("P2 Score: " + p2Score, 750, 40);
 
 		g.drawString("Rallies: " + hits, (int) (WIDTH / 2.35), HEIGHT / 10);
+
+		if (hPaddle instanceof AI) {
+			g.drawString("Difficulty: " + ((AI) hPaddle).getSkill(), 750, 60);
+		}
+		if (cPaddle instanceof AI) {
+			g.drawString("Difficulty: " + ((AI) cPaddle).getSkill(), 50, 60);
+		}
 
 		if (ball.getX() <= 0) {
 			p2Score++;
