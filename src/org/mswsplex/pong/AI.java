@@ -13,7 +13,7 @@ public class AI extends Paddle {
 
 	private int minX, maxX;
 
-	private boolean onRight;
+	private boolean onRight, lastRight;
 
 	private double skill; // 0-1 inclusive
 
@@ -24,14 +24,17 @@ public class AI extends Paddle {
 		this.maxX = maxX;
 		this.onRight = onRight;
 		this.skill = skill;
+		this.lastRight = false;
 
 		prevY = new ArrayList<>();
 	}
 
 	@Override
 	public void move() {
+
 		double estY = ball.getY(), tmpX = ball.getX(), tmpY = ball.getY(),
-				tmpVX = ball.getXVel() * (10 + ((1 - skill) * 10)), tmpVY = ball.getYVel() * (10 + ((1 - skill) * 10));
+				tmpVX = ball.getXVel() * (5 + ((1 - skill) * 20.0)),
+				tmpVY = ball.getYVel() * (5 + ((1 - skill) * 20.0));
 
 		if (skill == 0) {
 			if (Math.abs(this.getY() + this.getHeight() / 2 - (ball.getY() + ball.getHeight() / 2)) > 10) {
@@ -53,6 +56,16 @@ public class AI extends Paddle {
 		ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
 		int amo = 0;
+
+		// Clear Right Paddle History
+		if (ball.getXVel() > 0 && !lastRight && onRight) {
+			prevY.clear();
+		}
+
+		// Clear Left Paddle History
+		if (ball.getXVel() < 0 && lastRight && !onRight) {
+			prevY.clear();
+		}
 
 		while (!est && amo < 1000) {
 			if (onRight) {
@@ -107,16 +120,17 @@ public class AI extends Paddle {
 
 		double dist = Math.abs(getY() - avgY);
 
-		if (dist > 5 + (1 - skill) * 50.0) {
+		if (dist > 4.5 + (1 - skill) * 50.0) {
 			if (getY() > avgY) {
-				setYVel((float) (-3 - (skill * 2.5)));
+				setYVel((float) (-3 - (skill * 1.5)));
 			} else {
-				setYVel((float) (3 + (skill * 2.5)));
+				setYVel((float) (3 + (skill * 1.5)));
 			}
 		} else {
 			setYVel(0);
 		}
 
+		lastRight = ball.getXVel() > 0;
 		super.move();
 	}
 

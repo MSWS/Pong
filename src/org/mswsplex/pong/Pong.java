@@ -138,7 +138,7 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 
 		int sm = manageTextAndScores(gfx);
 		if (sm != 0) {
-			status = Status.SCORE;
+			// status = Status.SCORE;
 			hits = 0;
 			rps = 0;
 			lastRps = 0;
@@ -224,12 +224,12 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 				hPaddle.move();
 				ball.move();
 
-				if (mousePressed) {
+				if (mousePressed && getMousePosition() != null) {
 					double velX = getMousePosition().getX() - prevMouseX, velY = getMousePosition().getY() - prevMouseY;
 					ball.setX((int) getMousePosition().getX() - ball.getWidth() / 2);
 					ball.setY((int) getMousePosition().getY() - ball.getHeight() / 2);
-					ball.setXVel(velX);
-					ball.setYVel(velY);
+					ball.setXVel(ball.getXVel() + velX);
+					ball.setYVel(ball.getYVel() + velY);
 					prevMouseX = getMousePosition().getX();
 					prevMouseY = getMousePosition().getY();
 				}
@@ -294,6 +294,7 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 			switch (status) {
 			case START:
 			case SCORE:
+				ball.reset();
 			case PAUSE:
 				status = Status.RUNNING;
 				break;
@@ -321,6 +322,12 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+		if (status != Status.RUNNING)
+			return;
+		ball.setXVel(0);
+		ball.setYVel(0);
+		prevMouseX = e.getX();
+		prevMouseY = e.getY();
 		mousePressed = true;
 	}
 

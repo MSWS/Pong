@@ -23,8 +23,8 @@ public class Ball {
 	}
 
 	public void reset() {
-		this.x = Pong.WIDTH / 2 - (width * (1 / 4));
-		this.y = Pong.HEIGHT / 2 - (height * (1 / 4));
+		this.x = Pong.WIDTH / 2 - (width / 2);
+		this.y = Pong.HEIGHT / 2 - (height / 2);
 
 		this.width = fWidth;
 		this.height = fHeight;
@@ -106,7 +106,7 @@ public class Ball {
 			if (x + width >= paddle.getX() && x <= paddle.getX() + paddle.getWidth()) {
 				if (y + height >= paddle.getY() && y <= paddle.getY() + paddle.getHeight()) {
 					xVel = -xVel * ThreadLocalRandom.current().nextDouble(1.01, 1.06);
-					yVel = ((y + height / 2) - (paddle.getY() + paddle.getHeight() / 2)) / 2.5
+					yVel = ((y + height / 2.0) - (paddle.getY() + paddle.getHeight() / 2.0)) / 2.0
 							+ ThreadLocalRandom.current().nextDouble(-.5, .5);
 					width = (float) Math.max(5, width * .99);
 					height = (float) Math.max(5, height * .99);
@@ -122,6 +122,7 @@ public class Ball {
 		if (Pong.status == Status.RUNNING)
 			for (HEntry he : history)
 				he.move();
+		
 		for (int i = 1; i < history.size(); i++) {
 			if (i == 0) {
 				continue;

@@ -11,7 +11,7 @@ public class Paddle {
 
 	public Paddle(Color color, int x) {
 		height = 70;
-		width = 10;
+		width = 15;
 		xVel = 0;
 		yVel = 0;
 		maxXVel = 0;

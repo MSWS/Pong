@@ -8,8 +8,8 @@ public class HEntry {
 	public HEntry(double x, double y, double vx, double vy) {
 		this.x = x;
 		this.y = y;
-		this.vx = -vx;
-		this.vy = -vy;
+		this.vx = -vx * 2;
+		this.vy = -vy * 2;
 
 		age = System.currentTimeMillis();
 	}
