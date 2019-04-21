@@ -20,7 +20,9 @@ public class Pong extends Applet implements Runnable, KeyListener {
 	AI cPaddle;
 	Ball ball;
 
-	public static final int WIDTH = 1000, HEIGHT = 500;
+	// Default resolution is 1000 : 500
+
+	public static final int WIDTH = 1360, HEIGHT = 650;
 	private Set<Paddle> paddles;
 
 	Graphics gfx;
@@ -34,7 +36,9 @@ public class Pong extends Applet implements Runnable, KeyListener {
 
 	public static final Font FONT = new Font("Consolas", Font.BOLD, 24);
 
-	private long startTime;
+	private long startTime, lastFpsTime, lastRpsTime;
+
+	private float fps, lastFps, rps, lastRps; // Rallies Per Second
 
 	@Override
 	public void init() {
@@ -44,8 +48,9 @@ public class Pong extends Applet implements Runnable, KeyListener {
 		rnd = ThreadLocalRandom.current();
 		paddles = new HashSet<Paddle>();
 		startTime = System.currentTimeMillis();
+		lastFpsTime = System.currentTimeMillis();
 
-		ball = new Ball(Color.GREEN, 20, 20);
+		ball = new Ball(15, 15);
 
 		// hPaddle = new Paddle(Color.WHITE, 950);
 		// hPaddle = new AI(Color.WHITE, 950, ball, true, 50, 950,
@@ -53,8 +58,10 @@ public class Pong extends Applet implements Runnable, KeyListener {
 		// cPaddle = new AI(Color.WHITE, 50, ball, false, 50, 950,
 		// Math.round(rnd.nextDouble() * 1000.0) / 1000.0);
 
-		hPaddle = new AI(Color.WHITE, 950, ball, true, 50, 950, 1);
-		cPaddle = new AI(Color.WHITE, 50, ball, false, 50, 950, 1);
+		hPaddle = new AI(Color.WHITE, (int) (WIDTH * (19.0 / 20.0)), ball, true, (int) (WIDTH * (1.0 / 20.0)),
+				(int) (WIDTH * (19.0 / 20.0)), 1);
+		cPaddle = new AI(Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), ball, false, (int) (WIDTH * (1.0 / 20.0)),
+				(int) (WIDTH * (19.0 / 20.0)), 1);
 
 		paddles.add(cPaddle);
 		paddles.add(hPaddle);
@@ -64,7 +71,7 @@ public class Pong extends Applet implements Runnable, KeyListener {
 
 		gfx.setFont(FONT);
 
-		this.addKeyListener(this);
+		addKeyListener(this);
 
 		thread = new Thread(this);
 		thread.start();
@@ -87,14 +94,6 @@ public class Pong extends Applet implements Runnable, KeyListener {
 			return;
 		}
 
-		int sm = manageTextAndScores(gfx);
-		if (sm != 0) {
-			// status = Status.SCORE;
-			hits = 0;
-			resetPositions();
-			winner = sm;
-		}
-
 		drawLines(gfx);
 
 		if (status == Status.SCORE) {
@@ -112,8 +111,19 @@ public class Pong extends Applet implements Runnable, KeyListener {
 				gfx.setFont(FONT);
 			}
 
-			drawPaddles(gfx);
 			drawBall(gfx);
+			drawPaddles(gfx);
+		}
+
+		int sm = manageTextAndScores(gfx);
+		if (sm != 0) {
+			// status = Status.SCORE;
+			hits = 0;
+			rps = 0;
+			lastRps = 0;
+			lastRpsTime = System.currentTimeMillis();
+			resetPositions();
+			winner = sm;
 		}
 
 		g.drawImage(img, 0, 0, this);
@@ -121,18 +131,24 @@ public class Pong extends Applet implements Runnable, KeyListener {
 
 	public int manageTextAndScores(Graphics g) {
 		g.setColor(Color.WHITE);
+		g.drawString("FPS: " + lastFps, 10, 20);
 
-		g.drawString("P1 Score: " + p1Score, 50, 40);
-		g.drawString("P2 Score: " + p2Score, 750, 40);
-
-		g.drawString("Rallies: " + hits, (int) (WIDTH / 2.35), HEIGHT / 10);
-
-		if (hPaddle instanceof AI) {
-			g.drawString("Difficulty: " + ((AI) hPaddle).getSkill(), 750, 60);
-		}
+		g.setColor(Color.BLUE);
+		g.drawString(p1Score + "", (int) (WIDTH * (1.0 / 4.0)), 40);
 		if (cPaddle instanceof AI) {
-			g.drawString("Difficulty: " + ((AI) cPaddle).getSkill(), 50, 60);
+			g.drawString("(" + ((AI) cPaddle).getSkill() + ")", (int) (WIDTH * (1.0 / 4.0)), 60);
 		}
+
+		g.setColor(Color.RED);
+		g.drawString(p2Score + "", (int) (WIDTH * (3.0 / 4.0)), 40);
+		if (hPaddle instanceof AI) {
+			g.drawString("(" + ((AI) hPaddle).getSkill() + ")", (int) (WIDTH * (3.0 / 4.0)), 60);
+		}
+
+		g.setColor(Color.GRAY);
+		g.drawString(hits + " (" + lastRps + ")", (int) (WIDTH / 2.1), HEIGHT / 10);
+
+		g.setColor(Color.WHITE);
 
 		if (ball.getX() <= 0) {
 			p2Score++;
@@ -186,12 +202,30 @@ public class Pong extends Applet implements Runnable, KeyListener {
 				cPaddle.move();
 				hPaddle.move();
 				ball.move();
-				if (ball.checkCollision(paddles))
+				if (ball.checkCollision(paddles)) {
+					rps++;
 					hits++;
+				}
 			}
 			repaint();
+			fps++;
+
+			long frameSampleTime = 5000, rallySampleTime = 5000;
+
+			if (System.currentTimeMillis() - lastFpsTime > frameSampleTime) {
+				lastFps = (fps / (frameSampleTime / 1000));
+				fps = 0;
+				lastFpsTime = System.currentTimeMillis();
+			}
+
+			if (System.currentTimeMillis() - lastRpsTime > rallySampleTime) {
+				lastRps = (rps / (rallySampleTime / 1000));
+				rps = 0;
+				lastRpsTime = System.currentTimeMillis();
+			}
+
 			try {
-				Thread.sleep(1);
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

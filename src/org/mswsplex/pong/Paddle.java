@@ -10,23 +10,23 @@ public class Paddle {
 	private Color color;
 
 	public Paddle(Color color, int x) {
-		this.height = 70;
-		this.width = 10;
-		this.xVel = 0;
-		this.yVel = 0;
-		this.maxXVel = 0;
-		this.maxYVel = 3;
+		height = 70;
+		width = 10;
+		xVel = 0;
+		yVel = 0;
+		maxXVel = 0;
+		maxYVel = 10;
 
-		this.y = Pong.HEIGHT / 2 - (height * 1 / 4);
+		y = Pong.HEIGHT / 2 - (height * 1 / 4);
 		this.x = x;
 
 		this.color = color;
 	}
 
 	public void resetPosition() {
-		this.xVel = 0;
-		this.yVel = 0;
-		this.y = Pong.HEIGHT / 2 - (height * 1 / 4);
+		xVel = 0;
+		yVel = 0;
+		y = Pong.HEIGHT / 2 - (height * 1 / 4);
 	}
 
 	public void draw(Graphics g) {
@@ -36,11 +36,11 @@ public class Paddle {
 	}
 
 	public void move() {
-		this.y += yVel;
-		if (this.y < 0) {
-			this.y = 0;
-		} else if (this.y > Pong.HEIGHT - this.height) {
-			this.y = Pong.HEIGHT - this.height;
+		y += yVel;
+		if (y < 0) {
+			y = 0;
+		} else if (y > Pong.HEIGHT - height) {
+			y = Pong.HEIGHT - height;
 		}
 	}
 
@@ -53,7 +53,7 @@ public class Paddle {
 	}
 
 	public void setY(int y) {
-		this.y = Math.min(Math.max(0, y), Pong.HEIGHT - this.height);
+		this.y = Math.min(Math.max(0, y), Pong.HEIGHT - height);
 	}
 
 	public void setX(int x) {
@@ -77,7 +77,7 @@ public class Paddle {
 	}
 
 	public Color getColor() {
-		return this.color;
+		return color;
 	}
 
 	public void setXVel(float xVel) {

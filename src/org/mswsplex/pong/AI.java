@@ -39,7 +39,7 @@ public class AI extends Paddle {
 		ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
 		int amo = 0;
-		while (!est && amo < 100) {
+		while (!est && amo < 1000) {
 			if (onRight) {
 				if (tmpX >= this.getX() - ball.getWidth()) {
 					estY = tmpY;

@@ -13,20 +13,13 @@ public class Ball {
 
 	private final float fWidth, fHeight;
 
-	private Color color;
+	private List<HEntry> history;
 
-	private List<Integer> historyX, historyY;
-
-	public Ball(Color color, float width, float height) {
+	public Ball(float width, float height) {
 		this.fWidth = width;
 		this.fHeight = height;
-		this.color = color;
 
 		reset();
-	}
-
-	public void setX(int x) {
-		this.x = x;
 	}
 
 	public void reset() {
@@ -36,13 +29,16 @@ public class Ball {
 		this.width = fWidth;
 		this.height = fHeight;
 
-		historyX = new ArrayList<>();
-		historyY = new ArrayList<>();
+		history = new ArrayList<>();
 
 		ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
 		xVel = rnd.nextBoolean() ? 2 + rnd.nextDouble() : -2 - rnd.nextDouble();
 		yVel = rnd.nextDouble(-5, 5);
+	}
+
+	public void setX(int x) {
+		this.x = x;
 	}
 
 	public void setY(int y) {
@@ -85,31 +81,26 @@ public class Ball {
 			y = Pong.HEIGHT - height;
 		}
 
-		historyX.add((int) x);
-		historyY.add((int) y);
+		int hSize = 500;
 
-		int hSize = 100;
-
-		if (historyX.size() > hSize)
-			for (int i = 0; i < historyX.size() - hSize; i++) {
-				historyX.remove(i);
-				historyY.remove(i);
+		if (history.size() > hSize) {
+			for (int i = 0; i < history.size() - hSize; i++) {
+				history.remove(i);
 			}
+		}
+
+		history.add(new HEntry(x, y, xVel, yVel));
 	}
 
 	public boolean checkCollision(Set<Paddle> paddles) {
 		for (Paddle paddle : paddles) {
 			if (x + width >= paddle.getX() && x <= paddle.getX() + paddle.getWidth()) {
-				// within X coords of paddle
-
 				if (y + height >= paddle.getY() && y <= paddle.getY() + paddle.getHeight()) {
-					// within Y coords of paddle
-					// hitting left side of paddle
-					xVel = -xVel * ThreadLocalRandom.current().nextDouble(1, 1.05);
-					yVel = ((y + height / 2) - (paddle.getY() + paddle.getHeight() / 2)) / 8
+					xVel = -xVel * ThreadLocalRandom.current().nextDouble(1, 1.01);
+					yVel = ((y + height / 2) - (paddle.getY() + paddle.getHeight() / 2)) / 5
 							+ ThreadLocalRandom.current().nextDouble(-.5, .5);
-					width = (float) Math.max(10, width * .99);
-					height = (float) Math.max(10, height * .99);
+					width = (float) Math.max(5, width * .99);
+					height = (float) Math.max(5, height * .99);
 					return true;
 				}
 			}
@@ -118,20 +109,36 @@ public class Ball {
 	}
 
 	public void draw(Graphics g) {
-		int pX = -1, pY = -1;
-		for (int i = 1; i < historyX.size(); i++) {
+		int px = -1, py = -1;
+		if (Pong.status == Status.RUNNING)
+			for (HEntry he : history)
+				he.move();
+		for (int i = 1; i < history.size(); i++) {
 			if (i == 0) {
 				continue;
 			}
+			px = (int) history.get(i - 1).getX();
+			py = (int) history.get(i - 1).getY();
 
-			pX = historyX.get(i - 1);
-			pY = historyY.get(i - 1);
-			g.setColor(new Color((int) (((double) i / historyX.size()) * 255),
-					(int) (((double) i / historyX.size()) * 255), (int) (((double) i / historyX.size()) * 255)));
-			g.drawLine(pX + this.getWidth() / 2, pY + this.getHeight() / 2, historyX.get(i) + this.getWidth() / 2,
-					historyY.get(i) + this.getHeight() / 2);
+			g.setColor(new Color(Color.HSBtoRGB(((float) i / (float) history.size() / 100.0f) * 360.0f, 1.0f,
+					(float) i / history.size())));
+			g.drawLine(px + this.getWidth() / 2, py + this.getHeight() / 2,
+					(int) (history.get(i).getX() + this.getWidth() / 2),
+					(int) (history.get(i).getY() + this.getHeight() / 2));
 		}
-		g.setColor(color);
+
+		int red = 0, blue = 0;
+
+		if (x + getWidth() / 2 > Pong.WIDTH / 2) {
+			red = (int) (((x + getWidth() / 2) - Pong.WIDTH / 2.0) / (Pong.WIDTH / 2.0) * 255.0);
+		} else {
+			blue = (int) (((Pong.WIDTH / 2.0 - x) / (Pong.WIDTH / 2.0)) * 255.0);
+		}
+
+		red = Math.min(Math.max(red, 0), 255);
+		blue = Math.min(Math.max(blue, 0), 255);
+
+		g.setColor(new Color(red, Math.max(150 - (red + blue), 0), blue));
 		g.fillRect((int) x, (int) y, (int) width, (int) height);
 
 	}
