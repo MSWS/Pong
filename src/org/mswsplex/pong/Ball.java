@@ -129,7 +129,7 @@ public class Ball {
 			px = (int) history.get(i - 1).getX();
 			py = (int) history.get(i - 1).getY();
 
-			g.setColor(new Color(Color.HSBtoRGB(((float) i / (float) history.size() / 100.0f) * 360.0f, 1.0f,
+			g.setColor(new Color(Color.HSBtoRGB(((float) i / (float) history.size() / 150.0f) * 360.0f, 1.0f,
 					(float) i / history.size())));
 			g.drawLine(px + this.getWidth() / 2, py + this.getHeight() / 2,
 					(int) (history.get(i).getX() + this.getWidth() / 2),

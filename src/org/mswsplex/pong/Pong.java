@@ -138,7 +138,7 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 
 		int sm = manageTextAndScores(gfx);
 		if (sm != 0) {
-			// status = Status.SCORE;
+			status = Status.SCORE;
 			hits = 0;
 			rps = 0;
 			lastRps = 0;
