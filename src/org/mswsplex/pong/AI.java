@@ -30,15 +30,30 @@ public class AI extends Paddle {
 
 	@Override
 	public void move() {
-
 		double estY = ball.getY(), tmpX = ball.getX(), tmpY = ball.getY(),
 				tmpVX = ball.getXVel() * (10 + ((1 - skill) * 10)), tmpVY = ball.getYVel() * (10 + ((1 - skill) * 10));
+
+		if (skill == 0) {
+			if (Math.abs(this.getY() + this.getHeight() / 2 - (ball.getY() + ball.getHeight() / 2)) > 10) {
+				if (this.getY() + this.getHeight() / 2 < ball.getY() + ball.getHeight() / 2) {
+					this.setYVel(3);
+				} else {
+					this.setYVel(-3);
+				}
+			} else {
+				this.setYVel(0);
+			}
+
+			super.move();
+			return;
+		}
 
 		boolean est = false;
 
 		ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
 		int amo = 0;
+
 		while (!est && amo < 1000) {
 			if (onRight) {
 				if (tmpX >= this.getX() - ball.getWidth()) {

@@ -7,22 +7,24 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Pong extends Applet implements Runnable, KeyListener {
+public class Pong extends Applet implements Runnable, KeyListener, MouseListener {
 
 	ThreadLocalRandom rnd;
 	Thread thread;
 
-	Paddle hPaddle;
-	AI cPaddle;
+	Paddle hPaddle, cPaddle;
 	Ball ball;
 
-	// Default resolution is 1000 : 500
+	// Default resolution is 1000:500
+	// Personal resolution is 1360:650
 
-	public static final int WIDTH = 1360, HEIGHT = 650;
+	public static final int WIDTH = 1000, HEIGHT = 500;
 	private Set<Paddle> paddles;
 
 	Graphics gfx;
@@ -40,6 +42,10 @@ public class Pong extends Applet implements Runnable, KeyListener {
 
 	private float fps, lastFps, rps, lastRps; // Rallies Per Second
 
+	private boolean mousePressed = false;
+
+	private double prevMouseX, prevMouseY;
+
 	@Override
 	public void init() {
 		resize(WIDTH, HEIGHT);
@@ -52,16 +58,30 @@ public class Pong extends Applet implements Runnable, KeyListener {
 
 		ball = new Ball(15, 15);
 
+		// Random Level AI
+
 		// hPaddle = new Paddle(Color.WHITE, 950);
 		// hPaddle = new AI(Color.WHITE, 950, ball, true, 50, 950,
 		// Math.round(rnd.nextDouble() * 1000.0) / 1000.0);
 		// cPaddle = new AI(Color.WHITE, 50, ball, false, 50, 950,
 		// Math.round(rnd.nextDouble() * 1000.0) / 1000.0);
 
+		// Basic AI
+//		hPaddle = new AI(Color.WHITE, (int) (WIDTH * (19.0 / 20.0)), ball, true, (int) (WIDTH * (1.0 / 20.0)),
+//				(int) (WIDTH * (19.0 / 20.0)), 0);
+//		cPaddle = new AI(Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), ball, true, (int) (WIDTH * (19.0 / 20.0)),
+//				(int) (WIDTH * (1.0 / 20.0)), 0);
+
+		// Expert Level AI
+
 		hPaddle = new AI(Color.WHITE, (int) (WIDTH * (19.0 / 20.0)), ball, true, (int) (WIDTH * (1.0 / 20.0)),
 				(int) (WIDTH * (19.0 / 20.0)), 1);
 		cPaddle = new AI(Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), ball, false, (int) (WIDTH * (1.0 / 20.0)),
 				(int) (WIDTH * (19.0 / 20.0)), 1);
+
+		// Human
+//		hPaddle = new Paddle(Color.WHITE, (int) (WIDTH * (19.0 / 20.0)));
+//		cPaddle = new Paddle(Color.WHITE, (int) (WIDTH * (1.0 / 20.0)));
 
 		paddles.add(cPaddle);
 		paddles.add(hPaddle);
@@ -72,6 +92,7 @@ public class Pong extends Applet implements Runnable, KeyListener {
 		gfx.setFont(FONT);
 
 		addKeyListener(this);
+		addMouseListener(this);
 
 		thread = new Thread(this);
 		thread.start();
@@ -172,7 +193,7 @@ public class Pong extends Applet implements Runnable, KeyListener {
 	}
 
 	public void drawLines(Graphics g) {
-		int lineWidth = 5, lineHeight = 30, lineGap = 15;
+		int lineWidth = 2, lineHeight = 30, lineGap = 15;
 
 		g.setColor(Color.WHITE);
 
@@ -202,6 +223,16 @@ public class Pong extends Applet implements Runnable, KeyListener {
 				cPaddle.move();
 				hPaddle.move();
 				ball.move();
+
+				if (mousePressed) {
+					double velX = getMousePosition().getX() - prevMouseX, velY = getMousePosition().getY() - prevMouseY;
+					ball.setX((int) getMousePosition().getX() - ball.getWidth() / 2);
+					ball.setY((int) getMousePosition().getY() - ball.getHeight() / 2);
+					ball.setXVel(velX);
+					ball.setYVel(velY);
+					prevMouseX = getMousePosition().getX();
+					prevMouseY = getMousePosition().getY();
+				}
 				if (ball.checkCollision(paddles)) {
 					rps++;
 					hits++;
@@ -246,6 +277,14 @@ public class Pong extends Applet implements Runnable, KeyListener {
 		case KeyEvent.VK_DOWN:
 			hPaddle.setYVel(5);
 			break;
+		case KeyEvent.VK_W:
+			if (!(cPaddle instanceof AI))
+				cPaddle.setYVel(-5);
+			break;
+		case KeyEvent.VK_S:
+			if (!(cPaddle instanceof AI))
+				cPaddle.setYVel(5);
+			break;
 		}
 	}
 
@@ -264,9 +303,38 @@ public class Pong extends Applet implements Runnable, KeyListener {
 			}
 		}
 
+		if (!(cPaddle instanceof AI)) {
+			if ((key.getKeyCode() == KeyEvent.VK_W || key.getKeyCode() == KeyEvent.VK_S)) {
+				cPaddle.setYVel(0);
+			}
+		}
+
 		if (!(key.getKeyCode() == KeyEvent.VK_UP || key.getKeyCode() == KeyEvent.VK_DOWN))
 			return;
 
 		hPaddle.setYVel(0);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		mousePressed = true;
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		mousePressed = false;
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		mousePressed = false;
 	}
 }

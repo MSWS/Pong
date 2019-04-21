@@ -33,7 +33,7 @@ public class Ball {
 
 		ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
-		xVel = rnd.nextBoolean() ? 2 + rnd.nextDouble() : -2 - rnd.nextDouble();
+		xVel = rnd.nextBoolean() ? 2.5 + rnd.nextDouble() : -2.5 - rnd.nextDouble();
 		yVel = rnd.nextDouble(-5, 5);
 	}
 
@@ -43,6 +43,14 @@ public class Ball {
 
 	public void setY(int y) {
 		this.y = y;
+	}
+
+	public void setXVel(double x) {
+		xVel = x;
+	}
+
+	public void setYVel(double y) {
+		yVel = y;
 	}
 
 	public double getX() {
@@ -83,21 +91,22 @@ public class Ball {
 
 		int hSize = 500;
 
+		history.add(new HEntry(x, y, xVel, yVel));
+
 		if (history.size() > hSize) {
 			for (int i = 0; i < history.size() - hSize; i++) {
 				history.remove(i);
 			}
 		}
 
-		history.add(new HEntry(x, y, xVel, yVel));
 	}
 
 	public boolean checkCollision(Set<Paddle> paddles) {
 		for (Paddle paddle : paddles) {
 			if (x + width >= paddle.getX() && x <= paddle.getX() + paddle.getWidth()) {
 				if (y + height >= paddle.getY() && y <= paddle.getY() + paddle.getHeight()) {
-					xVel = -xVel * ThreadLocalRandom.current().nextDouble(1, 1.01);
-					yVel = ((y + height / 2) - (paddle.getY() + paddle.getHeight() / 2)) / 5
+					xVel = -xVel * ThreadLocalRandom.current().nextDouble(1.01, 1.06);
+					yVel = ((y + height / 2) - (paddle.getY() + paddle.getHeight() / 2)) / 2.5
 							+ ThreadLocalRandom.current().nextDouble(-.5, .5);
 					width = (float) Math.max(5, width * .99);
 					height = (float) Math.max(5, height * .99);
