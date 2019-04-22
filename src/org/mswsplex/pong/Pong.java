@@ -18,25 +18,25 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 	ThreadLocalRandom rnd;
 	Thread thread;
 
-	Paddle hPaddle, cPaddle;
-	Ball ball;
+	private Paddle hPaddle, cPaddle;
+	private Ball ball;
 
 	// Default resolution is 1000:500
 	// Personal resolution is 1360:650
 
-	public static final int WIDTH = 1000, HEIGHT = 500;
+	private final int WIDTH = 1000, HEIGHT = 500;
 	private Set<Paddle> paddles;
 
-	Graphics gfx;
-	Image img;
+	private Graphics gfx;
+	private Image img;
 
-	public static int p1Score = 0, p2Score = 0;
+	private int p1Score = 0, p2Score = 0;
 
-	public static Status status;
+	private Status status;
 
 	private int winner, hits;
 
-	public static final Font FONT = new Font("Consolas", Font.BOLD, 24);
+	private final Font FONT = new Font("Consolas", Font.BOLD, 24);
 
 	private long startTime, lastFpsTime, lastRpsTime;
 
@@ -56,7 +56,7 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 		startTime = System.currentTimeMillis();
 		lastFpsTime = System.currentTimeMillis();
 
-		ball = new Ball(15, 15);
+		ball = new Ball(this, 15, 15);
 
 		// Random Level AI
 
@@ -74,9 +74,9 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 
 		// Expert Level AI
 
-		hPaddle = new AI(Color.WHITE, (int) (WIDTH * (19.0 / 20.0)), ball, true, (int) (WIDTH * (1.0 / 20.0)),
+		hPaddle = new AI(this, Color.WHITE, (int) (WIDTH * (19.0 / 20.0)), ball, true, (int) (WIDTH * (1.0 / 20.0)),
 				(int) (WIDTH * (19.0 / 20.0)), 1);
-		cPaddle = new AI(Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), ball, false, (int) (WIDTH * (1.0 / 20.0)),
+		cPaddle = new AI(this, Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), ball, false, (int) (WIDTH * (1.0 / 20.0)),
 				(int) (WIDTH * (19.0 / 20.0)), 1);
 
 		// Human
@@ -150,7 +150,19 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 		g.drawImage(img, 0, 0, this);
 	}
 
-	public int manageTextAndScores(Graphics g) {
+	public int getWidth() {
+		return WIDTH;
+	}
+
+	public int getHeight() {
+		return HEIGHT;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	private int manageTextAndScores(Graphics g) {
 		g.setColor(Color.WHITE);
 		g.drawString("FPS: " + lastFps, 10, 20);
 

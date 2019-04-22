@@ -17,14 +17,17 @@ public class AI extends Paddle {
 
 	private double skill; // 0-1 inclusive
 
-	public AI(Color color, int x, Ball ball, boolean onRight, int minX, int maxX, double skill) {
-		super(color, x);
+	private Pong game;
+
+	public AI(Pong game, Color color, int x, Ball ball, boolean onRight, int minX, int maxX, double skill) {
+		super(game, color, x);
 		this.ball = ball;
 		this.minX = minX;
 		this.maxX = maxX;
 		this.onRight = onRight;
 		this.skill = skill;
 		this.lastRight = false;
+		this.game = game;
 
 		prevY = new ArrayList<>();
 	}
@@ -91,8 +94,8 @@ public class AI extends Paddle {
 					tmpVY = -tmpVY;
 				}
 
-				if (tmpY > Pong.HEIGHT - ball.getHeight()) {
-					tmpY = Pong.HEIGHT - ball.getHeight();
+				if (tmpY > game.getHeight() - ball.getHeight()) {
+					tmpY = game.getHeight() - ball.getHeight();
 					tmpVY = -tmpVY;
 				}
 

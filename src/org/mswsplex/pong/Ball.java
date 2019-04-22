@@ -15,19 +15,22 @@ public class Ball {
 
 	private List<HEntry> history;
 
-	public Ball(float width, float height) {
-		this.fWidth = width;
-		this.fHeight = height;
+	private Pong game;
+
+	public Ball(Pong game, float width, float height) {
+		fWidth = width;
+		fHeight = height;
+
+		this.game = game;
 
 		reset();
 	}
 
 	public void reset() {
-		this.x = Pong.WIDTH / 2 - (width / 2);
-		this.y = Pong.HEIGHT / 2 - (height / 2);
-
-		this.width = fWidth;
-		this.height = fHeight;
+		x = game.getWidth() / 2 - (width / 2);
+		y = game.getHeight() / 2 - (height / 2);
+		width = fWidth;
+		height = fHeight;
 
 		history = new ArrayList<>();
 
@@ -62,19 +65,19 @@ public class Ball {
 	}
 
 	public double getXVel() {
-		return this.xVel;
+		return xVel;
 	}
 
 	public double getYVel() {
-		return this.yVel;
+		return yVel;
 	}
 
 	public int getWidth() {
-		return (int) this.width;
+		return (int) width;
 	}
 
 	public int getHeight() {
-		return (int) this.height;
+		return (int) height;
 	}
 
 	public void move() {
@@ -84,21 +87,18 @@ public class Ball {
 		if (y <= 0) {
 			yVel = -yVel;
 			y = 0;
-		} else if (y >= Pong.HEIGHT - height) {
+		} else if (y >= game.getHeight() - height) {
 			yVel = -yVel;
-			y = Pong.HEIGHT - height;
+			y = game.getHeight() - height;
 		}
 
 		int hSize = 500;
 
 		history.add(new HEntry(x, y, xVel, yVel));
 
-		if (history.size() > hSize) {
-			for (int i = 0; i < history.size() - hSize; i++) {
+		if (history.size() > hSize)
+			for (int i = 0; i < history.size() - hSize; i++)
 				history.remove(i);
-			}
-		}
-
 	}
 
 	public boolean checkCollision(Set<Paddle> paddles) {
@@ -122,9 +122,8 @@ public class Ball {
 
 	public void draw(Graphics g) {
 		int px = -1, py = -1;
-		if (Pong.status == Status.RUNNING)
-			for (HEntry he : history)
-				he.move();
+		if (game.getStatus() == Status.RUNNING)
+			history.forEach(HEntry::move);
 
 		for (int i = 1; i < history.size(); i++) {
 			if (i == 0) {
@@ -142,10 +141,10 @@ public class Ball {
 
 		int red = 0, blue = 0;
 
-		if (x + getWidth() / 2 > Pong.WIDTH / 2) {
-			red = (int) (((x + getWidth() / 2) - Pong.WIDTH / 2.0) / (Pong.WIDTH / 2.0) * 255.0);
+		if (x + getWidth() / 2 > game.getWidth() / 2) {
+			red = (int) (((x + getWidth() / 2) - game.getWidth() / 2.0) / (game.getWidth() / 2.0) * 255.0);
 		} else {
-			blue = (int) (((Pong.WIDTH / 2.0 - x) / (Pong.WIDTH / 2.0)) * 255.0);
+			blue = (int) (((game.getWidth() / 2.0 - x) / (game.getWidth() / 2.0)) * 255.0);
 		}
 
 		red = Math.min(Math.max(red, 0), 255);

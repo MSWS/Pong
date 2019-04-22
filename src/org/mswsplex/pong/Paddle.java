@@ -9,7 +9,9 @@ public class Paddle {
 
 	private Color color;
 
-	public Paddle(Color color, int x) {
+	private Pong game;
+
+	public Paddle(Pong game, Color color, int x) {
 		height = 70;
 		width = 15;
 		xVel = 0;
@@ -17,7 +19,9 @@ public class Paddle {
 		maxXVel = 0;
 		maxYVel = 10;
 
-		y = Pong.HEIGHT / 2 - (height * 1 / 4);
+		this.game = game;
+
+		y = game.getHeight() / 2 - (height * 1 / 4);
 		this.x = x;
 
 		this.color = color;
@@ -26,7 +30,7 @@ public class Paddle {
 	public void resetPosition() {
 		xVel = 0;
 		yVel = 0;
-		y = Pong.HEIGHT / 2 - (height * 1 / 4);
+		y = game.getHeight() / 2 - (height * 1 / 4);
 	}
 
 	public void draw(Graphics g) {
@@ -39,8 +43,8 @@ public class Paddle {
 		y += yVel;
 		if (y < 0) {
 			y = 0;
-		} else if (y > Pong.HEIGHT - height) {
-			y = Pong.HEIGHT - height;
+		} else if (y > game.getHeight() - height) {
+			y = game.getHeight() - height;
 		}
 	}
 
@@ -53,7 +57,7 @@ public class Paddle {
 	}
 
 	public void setY(int y) {
-		this.y = Math.min(Math.max(0, y), Pong.HEIGHT - height);
+		this.y = Math.min(Math.max(0, y), game.getHeight() - height);
 	}
 
 	public void setX(int x) {
