@@ -103,13 +103,16 @@ public class Ball {
 
 	public boolean checkCollision(Set<Paddle> paddles) {
 		for (Paddle paddle : paddles) {
-			if (x + width >= paddle.getX() && x <= paddle.getX() + paddle.getWidth()) {
-				if (y + height >= paddle.getY() && y <= paddle.getY() + paddle.getHeight()) {
-					xVel = -xVel * ThreadLocalRandom.current().nextDouble(1.01, 1.06);
-					yVel = ((y + height / 2.0) - (paddle.getY() + paddle.getHeight() / 2.0)) / 2.0
-							+ ThreadLocalRandom.current().nextDouble(-.5, .5);
-					width = (float) Math.max(5, width * .99);
-					height = (float) Math.max(5, height * .99);
+			if (x + width + Math.abs(xVel) >= paddle.getX()
+					&& x - Math.abs(xVel) <= paddle.getX() + paddle.getWidth()) {
+				if (y + height + yVel >= paddle.getY() && y - yVel <= paddle.getY() + paddle.getHeight()) {
+					// xVel = -xVel * ThreadLocalRandom.current().nextDouble(1.01, 1.04);
+					xVel = -xVel;
+					xVel += 1 / xVel;
+					yVel = ((y + height / 2.0) - (paddle.getY() + paddle.getHeight() / 2.0)) / 1.0
+							+ ThreadLocalRandom.current().nextDouble(-.25, .25);
+					width = (float) Math.max(10, width * .999);
+					height = (float) Math.max(10, height * .999);
 					return true;
 				}
 			}
@@ -122,7 +125,7 @@ public class Ball {
 		if (Pong.status == Status.RUNNING)
 			for (HEntry he : history)
 				he.move();
-		
+
 		for (int i = 1; i < history.size(); i++) {
 			if (i == 0) {
 				continue;
@@ -130,7 +133,7 @@ public class Ball {
 			px = (int) history.get(i - 1).getX();
 			py = (int) history.get(i - 1).getY();
 
-			g.setColor(new Color(Color.HSBtoRGB(((float) i / (float) history.size() / 150.0f) * 360.0f, 1.0f,
+			g.setColor(new Color(Color.HSBtoRGB(((float) i / (float) history.size() / 50.0f) * 360.0f, 1.0f,
 					(float) i / history.size())));
 			g.drawLine(px + this.getWidth() / 2, py + this.getHeight() / 2,
 					(int) (history.get(i).getX() + this.getWidth() / 2),

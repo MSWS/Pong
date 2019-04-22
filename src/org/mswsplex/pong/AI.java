@@ -31,10 +31,9 @@ public class AI extends Paddle {
 
 	@Override
 	public void move() {
-
 		double estY = ball.getY(), tmpX = ball.getX(), tmpY = ball.getY(),
-				tmpVX = ball.getXVel() * (5 + ((1 - skill) * 20.0)),
-				tmpVY = ball.getYVel() * (5 + ((1 - skill) * 20.0));
+				tmpVX = ball.getXVel() * (3 + ((1 - skill) * 40.0)),
+				tmpVY = ball.getYVel() * (3 + ((1 - skill) * 40.0));
 
 		if (skill == 0) {
 			if (Math.abs(this.getY() + this.getHeight() / 2 - (ball.getY() + ball.getHeight() / 2)) > 10) {
@@ -67,37 +66,40 @@ public class AI extends Paddle {
 			prevY.clear();
 		}
 
-		while (!est && amo < 1000) {
-			if (onRight) {
-				if (tmpX >= this.getX() - ball.getWidth()) {
-					estY = tmpY;
-					est = true;
+		int max = (int) (500 + (skill * 100.0));
+
+		if (Math.abs(tmpVX) >= 0.00001)
+			while (!est && amo < max) {
+				if (onRight) {
+					if (tmpX >= this.getX() - ball.getWidth()) {
+						estY = tmpY;
+						est = true;
+					}
+				} else {
+					if (tmpX <= this.getX() + this.getWidth()) {
+						estY = tmpY;
+						est = true;
+					}
 				}
-			} else {
-				if (tmpX <= this.getX() + this.getWidth()) {
-					estY = tmpY;
-					est = true;
+
+				if (tmpX >= maxX || tmpX <= minX) {
+					tmpVX = -tmpVX;
 				}
-			}
 
-			if (tmpX >= maxX || tmpX <= minX) {
-				tmpVX = -tmpVX;
-			}
+				if (tmpY <= 0) {
+					tmpY = 0;
+					tmpVY = -tmpVY;
+				}
 
-			if (tmpY <= 0) {
-				tmpY = 0;
-				tmpVY = -tmpVY;
-			}
+				if (tmpY > Pong.HEIGHT - ball.getHeight()) {
+					tmpY = Pong.HEIGHT - ball.getHeight();
+					tmpVY = -tmpVY;
+				}
 
-			if (tmpY > Pong.HEIGHT - ball.getHeight()) {
-				tmpY = Pong.HEIGHT - ball.getHeight();
-				tmpVY = -tmpVY;
+				tmpX += tmpVX + rnd.nextDouble((-(1 - skill)) * 5, (1.01 - skill) * 5);
+				tmpY += tmpVY + rnd.nextDouble((-(1 - skill)) * 5, (1.01 - skill) * 5);
+				amo++;
 			}
-
-			tmpX += tmpVX + rnd.nextDouble((-(1 - skill)) * 5, (1.01 - skill) * 5);
-			tmpY += tmpVY + rnd.nextDouble((-(1 - skill)) * 5, (1.01 - skill) * 5);
-			amo++;
-		}
 
 		estY += ball.getHeight() / 2;
 		estY -= this.getHeight() / 2;

@@ -228,8 +228,8 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 					double velX = getMousePosition().getX() - prevMouseX, velY = getMousePosition().getY() - prevMouseY;
 					ball.setX((int) getMousePosition().getX() - ball.getWidth() / 2);
 					ball.setY((int) getMousePosition().getY() - ball.getHeight() / 2);
-					ball.setXVel(ball.getXVel() + velX);
-					ball.setYVel(ball.getYVel() + velY);
+					ball.setXVel(ball.getXVel() + velX / 10);
+					ball.setYVel(ball.getYVel() + velY / 10);
 					prevMouseX = getMousePosition().getX();
 					prevMouseY = getMousePosition().getY();
 				}
@@ -241,10 +241,10 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 			repaint();
 			fps++;
 
-			long frameSampleTime = 5000, rallySampleTime = 5000;
+			long frameSampleTime = 2000, rallySampleTime = 5000;
 
 			if (System.currentTimeMillis() - lastFpsTime > frameSampleTime) {
-				lastFps = (fps / (frameSampleTime / 1000));
+				lastFps = (float) (fps / (frameSampleTime / 1000.0));
 				fps = 0;
 				lastFpsTime = System.currentTimeMillis();
 			}
@@ -272,10 +272,12 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 	public void keyPressed(KeyEvent key) {
 		switch (key.getKeyCode()) {
 		case KeyEvent.VK_UP:
-			hPaddle.setYVel(-5);
+			if (!(hPaddle instanceof AI))
+				hPaddle.setYVel(-5);
 			break;
 		case KeyEvent.VK_DOWN:
-			hPaddle.setYVel(5);
+			if (!(hPaddle instanceof AI))
+				hPaddle.setYVel(5);
 			break;
 		case KeyEvent.VK_W:
 			if (!(cPaddle instanceof AI))

@@ -80,6 +80,10 @@ public class Paddle {
 		return color;
 	}
 
+	public void setColor(Color color) {
+		this.color = color;
+	}
+
 	public void setXVel(float xVel) {
 		this.xVel = Math.min(Math.max(xVel, -maxXVel), maxXVel);
 	}
