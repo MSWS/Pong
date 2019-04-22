@@ -92,13 +92,14 @@ public class Ball {
 			y = game.getHeight() - height;
 		}
 
-		int hSize = 500;
-
 		history.add(new HEntry(x, y, xVel, yVel));
+
+		int hSize = 10000;
 
 		if (history.size() > hSize)
 			for (int i = 0; i < history.size() - hSize; i++)
 				history.remove(i);
+
 	}
 
 	public boolean checkCollision(Set<Paddle> paddles) {
@@ -108,8 +109,8 @@ public class Ball {
 				if (y + height + yVel >= paddle.getY() && y - yVel <= paddle.getY() + paddle.getHeight()) {
 					// xVel = -xVel * ThreadLocalRandom.current().nextDouble(1.01, 1.04);
 					xVel = -xVel;
-					xVel += 1 / xVel;
-					yVel = ((y + height / 2.0) - (paddle.getY() + paddle.getHeight() / 2.0)) / 1.0
+					xVel += 1 / xVel / 5;
+					yVel = ((y + height / 2.0) - (paddle.getY() + paddle.getHeight() / 2.0)) / 2.0
 							+ ThreadLocalRandom.current().nextDouble(-.25, .25);
 					width = (float) Math.max(10, width * .999);
 					height = (float) Math.max(10, height * .999);
@@ -121,7 +122,8 @@ public class Ball {
 	}
 
 	public void draw(Graphics g) {
-		int px = -1, py = -1;
+		int px = -1, py = -1, cx, cy;
+
 		if (game.getStatus() == Status.RUNNING)
 			history.forEach(HEntry::move);
 
@@ -132,11 +134,13 @@ public class Ball {
 			px = (int) history.get(i - 1).getX();
 			py = (int) history.get(i - 1).getY();
 
+			cx = (int) history.get(i).getX();
+			cy = (int) history.get(i).getY();
+
 			g.setColor(new Color(Color.HSBtoRGB(((float) i / (float) history.size() / 50.0f) * 360.0f, 1.0f,
 					(float) i / history.size())));
-			g.drawLine(px + this.getWidth() / 2, py + this.getHeight() / 2,
-					(int) (history.get(i).getX() + this.getWidth() / 2),
-					(int) (history.get(i).getY() + this.getHeight() / 2));
+			g.drawLine(px + this.getWidth() / 2, py + this.getHeight() / 2, (int) (cx + this.getWidth() / 2),
+					(int) (cy + this.getHeight() / 2));
 		}
 
 		int red = 0, blue = 0;

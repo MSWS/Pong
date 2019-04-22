@@ -11,9 +11,9 @@ public class Paddle {
 
 	private Pong game;
 
-	public Paddle(Pong game, Color color, int x) {
-		height = 70;
-		width = 15;
+	public Paddle(Pong game, Color color, int x, int height, int width) {
+		this.height = height;
+		this.width = width;
 		xVel = 0;
 		yVel = 0;
 		maxXVel = 0;

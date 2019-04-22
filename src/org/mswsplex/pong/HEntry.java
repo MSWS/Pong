@@ -8,8 +8,20 @@ public class HEntry {
 	public HEntry(double x, double y, double vx, double vy) {
 		this.x = x;
 		this.y = y;
-		this.vx = -vx * 2;
-		this.vy = -vy * 2;
+
+//		if (vx > 0) {
+//			this.vx = Math.min(.1, vx);
+//		} else {
+//			this.vx = Math.max(-.1, vx);
+//		}
+//
+//		if (vy > 0) {
+//			this.vy = Math.min(.1, vy);
+//		} else {
+//			this.vy = Math.max(-.1, vy);
+//		}
+		this.vx = -vx;
+		this.vy = -vy;
 
 		age = System.currentTimeMillis();
 	}
@@ -23,10 +35,17 @@ public class HEntry {
 	}
 
 	public void move() {
-		x += vx;
-		y += vy;
-		vx *= (.9999 / (1 - (1.0 / (getTimeExisted() + .01))));
-		vy *= (.9999 / (1 - (1.0 / (getTimeExisted() + .01))));
+
+		long existed = getTimeExisted();
+		double m = (.9999 / (1 - (1.0 / (existed + .01))));
+
+		if (m < 1.009) {
+			vx *= m;
+			vy *= m;
+
+			x += vx;
+			y += vy;
+		}
 	}
 
 	public double getVX() {

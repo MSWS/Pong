@@ -19,8 +19,9 @@ public class AI extends Paddle {
 
 	private Pong game;
 
-	public AI(Pong game, Color color, int x, Ball ball, boolean onRight, int minX, int maxX, double skill) {
-		super(game, color, x);
+	public AI(Pong game, Color color, int x, int height, int width, Ball ball, boolean onRight, int minX, int maxX,
+			double skill) {
+		super(game, color, x, height, width);
 		this.ball = ball;
 		this.minX = minX;
 		this.maxX = maxX;

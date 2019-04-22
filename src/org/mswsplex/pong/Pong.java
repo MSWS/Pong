@@ -1,19 +1,22 @@
 package org.mswsplex.pong;
 
-import java.applet.Applet;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Pong extends Applet implements Runnable, KeyListener, MouseListener {
+public class Pong extends Frame implements Runnable, KeyListener, MouseListener, WindowListener {
 
 	ThreadLocalRandom rnd;
 	Thread thread;
@@ -24,11 +27,11 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 	// Default resolution is 1000:500
 	// Personal resolution is 1360:650
 
-	private final int WIDTH = 1000, HEIGHT = 500;
+	public static final int WIDTH = 1000, HEIGHT = 500;
 	private Set<Paddle> paddles;
 
 	private Graphics gfx;
-	private Image img;
+	private BufferedImage img;
 
 	private int p1Score = 0, p2Score = 0;
 
@@ -46,17 +49,27 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 
 	private double prevMouseX, prevMouseY;
 
-	@Override
-	public void init() {
-		resize(WIDTH, HEIGHT);
-		hits = 0;
+	public static void main(String[] args) {
+		Pong game = new Pong();
+		game.setSize(WIDTH, HEIGHT);
+		game.setVisible(true);
+		game.setLayout(new FlowLayout());
+		game.setTitle("Pong");
+	}
 
+	public Pong() {
+		hits = 0;
 		rnd = ThreadLocalRandom.current();
 		paddles = new HashSet<Paddle>();
 		startTime = System.currentTimeMillis();
 		lastFpsTime = System.currentTimeMillis();
 
 		ball = new Ball(this, 15, 15);
+
+		int pWidth = 70, pHeight = 15;
+
+		// int hPlayerX = (int) ((WIDTH * (19.0 / 20.0)) - (pWidth / 2.0));
+		int hPlayerX = (int) (((WIDTH * (19.0 / 20.0))) - (pWidth / 4));
 
 		// Random Level AI
 
@@ -74,10 +87,10 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 
 		// Expert Level AI
 
-		hPaddle = new AI(this, Color.WHITE, (int) (WIDTH * (19.0 / 20.0)), ball, true, (int) (WIDTH * (1.0 / 20.0)),
-				(int) (WIDTH * (19.0 / 20.0)), 1);
-		cPaddle = new AI(this, Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), ball, false, (int) (WIDTH * (1.0 / 20.0)),
-				(int) (WIDTH * (19.0 / 20.0)), 1);
+		hPaddle = new AI(this, Color.WHITE, hPlayerX, pWidth, pHeight, ball, true, (int) (WIDTH * (1.0 / 20.0)),
+				hPlayerX, 1);
+		cPaddle = new AI(this, Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), pWidth, pHeight, ball, false,
+				(int) (WIDTH * (1.0 / 20.0)), hPlayerX, 1);
 
 		// Human
 //		hPaddle = new Paddle(Color.WHITE, (int) (WIDTH * (19.0 / 20.0)));
@@ -86,13 +99,14 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 		paddles.add(cPaddle);
 		paddles.add(hPaddle);
 
-		img = createImage(WIDTH, HEIGHT);
+		img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 		gfx = img.getGraphics();
 
 		gfx.setFont(FONT);
 
 		addKeyListener(this);
 		addMouseListener(this);
+		addWindowListener(this);
 
 		thread = new Thread(this);
 		thread.start();
@@ -124,16 +138,18 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 			gfx.drawString("Press Enter To Continue", (int) (WIDTH / 2.5), (int) (HEIGHT / 1.8));
 			gfx.setFont(FONT);
 		} else {
+			drawBall(gfx);
+			drawPaddles(gfx);
+
 			if (status == Status.PAUSE) {
 				gfx.setColor(Color.blue);
-				gfx.drawString("Game Paused", (int) (WIDTH / 2.25), HEIGHT / 2);
-				gfx.setFont(FONT.deriveFont(18f));
-				gfx.drawString("Press Enter To Continue", (int) (WIDTH / 2.5), (int) (HEIGHT / 1.8));
+				gfx.setFont(FONT.deriveFont(FONT.getSize() * 2f));
+				gfx.drawString("Game Paused", (int) (WIDTH / 2.6), HEIGHT / 2);
+				gfx.setFont(FONT);
+				gfx.drawString("Press Enter To Continue", (int) (WIDTH / 2.8f), (int) (HEIGHT / 1.8));
 				gfx.setFont(FONT);
 			}
 
-			drawBall(gfx);
-			drawPaddles(gfx);
 		}
 
 		int sm = manageTextAndScores(gfx);
@@ -163,19 +179,23 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 	}
 
 	private int manageTextAndScores(Graphics g) {
-		g.setColor(Color.WHITE);
-		g.drawString("FPS: " + lastFps, 10, 20);
+		g.setColor(Color.LIGHT_GRAY);
+		g.setFont(FONT.deriveFont(FONT.getSize() * .75f));
+		g.drawString(lastFps + " FPS", 10, (int) (HEIGHT * (2.5 / 20.0)));
+		g.setFont(FONT);
 
 		g.setColor(Color.BLUE);
-		g.drawString(p1Score + "", (int) (WIDTH * (1.0 / 4.0)), 40);
+		g.drawString(p1Score + "", (int) (WIDTH * (1.0 / 4.0)), (int) (HEIGHT * (2.5 / 20.0)));
 		if (cPaddle instanceof AI) {
-			g.drawString("(" + ((AI) cPaddle).getSkill() + ")", (int) (WIDTH * (1.0 / 4.0)), 60);
+			g.drawString("(" + ((AI) cPaddle).getSkill() + ")", (int) (WIDTH * (1.0 / 4.0)),
+					(int) (HEIGHT * (3.5 / 20.0)));
 		}
 
 		g.setColor(Color.RED);
-		g.drawString(p2Score + "", (int) (WIDTH * (3.0 / 4.0)), 40);
+		g.drawString(p2Score + "", (int) (WIDTH * (3.0 / 4.0)), (int) (HEIGHT * (2.5 / 20.0)));
 		if (hPaddle instanceof AI) {
-			g.drawString("(" + ((AI) hPaddle).getSkill() + ")", (int) (WIDTH * (3.0 / 4.0)), 60);
+			g.drawString("(" + ((AI) hPaddle).getSkill() + ")", (int) (WIDTH * (3.0 / 4.0)),
+					(int) (HEIGHT * (3.5 / 20.0)));
 		}
 
 		g.setColor(Color.GRAY);
@@ -236,6 +256,8 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 				hPaddle.move();
 				ball.move();
 
+				setTitle("Pong " + p1Score + " | " + p2Score);
+
 				if (mousePressed && getMousePosition() != null) {
 					double velX = getMousePosition().getX() - prevMouseX, velY = getMousePosition().getY() - prevMouseY;
 					ball.setX((int) getMousePosition().getX() - ball.getWidth() / 2);
@@ -245,10 +267,12 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 					prevMouseX = getMousePosition().getX();
 					prevMouseY = getMousePosition().getY();
 				}
+
 				if (ball.checkCollision(paddles)) {
 					rps++;
 					hits++;
 				}
+
 			}
 			repaint();
 			fps++;
@@ -357,5 +381,47 @@ public class Pong extends Applet implements Runnable, KeyListener, MouseListener
 	@Override
 	public void mouseExited(MouseEvent e) {
 		mousePressed = false;
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		dispose();
+		System.exit(0);
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+
 	}
 }
