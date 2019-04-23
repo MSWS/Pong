@@ -12,9 +12,13 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+
+import org.mswsplex.pong.buttons.Button;
 
 public class Pong extends Frame implements Runnable, KeyListener, MouseListener, WindowListener {
 
@@ -28,6 +32,19 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 	// Personal resolution is 1360:650
 
 	public static final int WIDTH = 1000, HEIGHT = 500;
+	public static final Font FONT = new Font("Consolas", Font.BOLD, 24);
+
+	int bWidth = WIDTH / 5, bHeight = HEIGHT / 10, buttonX = (int) (WIDTH * (5.0 / 10.0) - bWidth / 2);
+
+	int singleY = (int) (HEIGHT * (2.0 / 10.0));
+	int multiY = (int) (HEIGHT * (4.0 / 10.0));
+	int aiY = (int) (HEIGHT * (6.0 / 10.0));
+
+	int pWidth = 70, pHeight = 15;
+
+	// int hPlayerX = (int) ((WIDTH * (19.0 / 20.0)) - (pWidth / 2.0));
+	int hPlayerX = (int) (((WIDTH * (19.0 / 20.0))) - (pWidth / 4));
+
 	private Set<Paddle> paddles;
 
 	private Graphics gfx;
@@ -39,8 +56,6 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 
 	private int winner, hits;
 
-	private final Font FONT = new Font("Consolas", Font.BOLD, 24);
-
 	private long startTime, lastFpsTime, lastRpsTime;
 
 	private float fps, lastFps, rps, lastRps; // Rallies Per Second
@@ -49,27 +64,31 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 
 	private double prevMouseX, prevMouseY;
 
+	private List<Button> buttons;
+
 	public static void main(String[] args) {
 		Pong game = new Pong();
 		game.setSize(WIDTH, HEIGHT);
+		game.setUndecorated(true);
 		game.setVisible(true);
 		game.setLayout(new FlowLayout());
 		game.setTitle("Pong");
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	public Pong() {
 		hits = 0;
 		rnd = ThreadLocalRandom.current();
 		paddles = new HashSet<Paddle>();
+		buttons = new ArrayList<>();
+
 		startTime = System.currentTimeMillis();
 		lastFpsTime = System.currentTimeMillis();
 
 		ball = new Ball(this, 15, 15);
-
-		int pWidth = 70, pHeight = 15;
-
-		// int hPlayerX = (int) ((WIDTH * (19.0 / 20.0)) - (pWidth / 2.0));
-		int hPlayerX = (int) (((WIDTH * (19.0 / 20.0))) - (pWidth / 4));
 
 		// Random Level AI
 
@@ -87,22 +106,44 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 
 		// Expert Level AI
 
-		hPaddle = new AI(this, Color.WHITE, hPlayerX, pWidth, pHeight, ball, true, (int) (WIDTH * (1.0 / 20.0)),
-				hPlayerX, 1);
-		cPaddle = new AI(this, Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), pWidth, pHeight, ball, false,
-				(int) (WIDTH * (1.0 / 20.0)), hPlayerX, 1);
+//		hPaddle = new AI(this, Color.WHITE, hPlayerX, pWidth, pHeight, ball, true, (int) (WIDTH * (1.0 / 20.0)),
+//				hPlayerX, 1);
+//		cPaddle = new AI(this, Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), pWidth, pHeight, ball, false,
+//				(int) (WIDTH * (1.0 / 20.0)), hPlayerX, 1);
 
 		// Human
 //		hPaddle = new Paddle(Color.WHITE, (int) (WIDTH * (19.0 / 20.0)));
 //		cPaddle = new Paddle(Color.WHITE, (int) (WIDTH * (1.0 / 20.0)));
 
-		paddles.add(cPaddle);
-		paddles.add(hPaddle);
-
 		img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 		gfx = img.getGraphics();
 
 		gfx.setFont(FONT);
+
+		addButtonListener(new Button("Single Player", buttonX, singleY, bWidth, bHeight) {
+			@Override
+			public void onClick() {
+				registerPlayers(1);
+				start();
+				super.onClick();
+			}
+		});
+		addButtonListener(new Button("Multi Player", buttonX, multiY, bWidth, bHeight) {
+			@Override
+			public void onClick() {
+				registerPlayers(2);
+				start();
+				super.onClick();
+			}
+		});
+		addButtonListener(new Button("Self Player", buttonX, aiY, bWidth, bHeight) {
+			@Override
+			public void onClick() {
+				registerPlayers(0);
+				start();
+				super.onClick();
+			}
+		});
 
 		addKeyListener(this);
 		addMouseListener(this);
@@ -111,12 +152,52 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 		thread = new Thread(this);
 		thread.start();
 
-		status = Status.START;
+		status = Status.MENU;
+	}
+
+	public void registerPlayers(int human) throws IllegalArgumentException {
+		switch (human) {
+		case 0:
+			hPaddle = new AI(this, Color.WHITE, hPlayerX, pWidth, pHeight, ball, true, (int) (WIDTH * (1.0 / 20.0)),
+					hPlayerX, 1);
+
+			cPaddle = new AI(this, Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), pWidth, pHeight, ball, false,
+					(int) (WIDTH * (1.0 / 20.0)), hPlayerX, 1);
+			break;
+		case 1:
+			cPaddle = new AI(this, Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), pWidth, pHeight, ball, false,
+					(int) (WIDTH * (1.0 / 20.0)), hPlayerX, 1);
+			hPaddle = new Paddle(this, Color.WHITE, hPlayerX, pWidth, pHeight);
+			break;
+		case 2:
+			cPaddle = new Paddle(this, Color.WHITE, (int) (WIDTH * (1.0 / 20.0)), pWidth, pHeight);
+			hPaddle = new Paddle(this, Color.WHITE, hPlayerX, pWidth, pHeight);
+			break;
+		default:
+			throw new IllegalArgumentException("Number must be between 0-2");
+		}
+
+		paddles.clear();
+
+		paddles.add(cPaddle);
+		paddles.add(hPaddle);
+	}
+
+	public void addButtonListener(Button button) {
+		buttons.add(button);
 	}
 
 	@Override
 	public void paint(Graphics g) {
+
 		drawBackground(gfx);
+
+		if (status == Status.MENU) {
+			drawButtons(gfx);
+
+			g.drawImage(img, 0, 0, this);
+			return;
+		}
 
 		if (status == Status.START) {
 			long time = System.currentTimeMillis() - startTime;
@@ -147,14 +228,16 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 				gfx.drawString("Game Paused", (int) (WIDTH / 2.6), HEIGHT / 2);
 				gfx.setFont(FONT);
 				gfx.drawString("Press Enter To Continue", (int) (WIDTH / 2.8f), (int) (HEIGHT / 1.8));
-				gfx.setFont(FONT);
+				gfx.setFont(FONT.deriveFont(FONT.getSize() * .5f));
+				gfx.drawString("(ESC) To Exit (SPACE) Menu", (int) (WIDTH / 2.2f), (int) (HEIGHT / 1.7));
+
 			}
 
 		}
 
 		int sm = manageTextAndScores(gfx);
 		if (sm != 0) {
-			// status = Status.SCORE;
+			status = Status.SCORE;
 			hits = 0;
 			rps = 0;
 			lastRps = 0;
@@ -164,6 +247,17 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 		}
 
 		g.drawImage(img, 0, 0, this);
+	}
+
+	public void start() {
+		status = Status.RUNNING;
+		hits = 0;
+		rps = 0;
+		lastRps = 0;
+		lastRpsTime = System.currentTimeMillis();
+		p1Score = 0;
+		p2Score = 0;
+		resetPositions();
 	}
 
 	public int getWidth() {
@@ -241,6 +335,10 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 
 	public void drawBall(Graphics g) {
 		ball.draw(g);
+	}
+
+	public void drawButtons(Graphics g) {
+		buttons.forEach((b) -> b.draw(g));
 	}
 
 	@Override
@@ -328,7 +426,8 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 
 	@Override
 	public void keyReleased(KeyEvent key) {
-		if (key.getKeyCode() == KeyEvent.VK_ENTER) {
+		switch (key.getKeyCode()) {
+		case KeyEvent.VK_ENTER:
 			switch (status) {
 			case START:
 			case SCORE:
@@ -339,6 +438,25 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 			case RUNNING:
 				status = Status.PAUSE;
 				break;
+			default:
+				break;
+			}
+			break;
+		case KeyEvent.VK_SPACE:
+			if (status == Status.PAUSE)
+				status = Status.MENU;
+			break;
+		case KeyEvent.VK_ESCAPE:
+			if (status != Status.PAUSE)
+				break;
+			dispose();
+			System.exit(0);
+			break;
+		}
+
+		if (key.getKeyCode() == KeyEvent.VK_SPACE) {
+			if (status == Status.PAUSE) {
+				status = Status.MENU;
 			}
 		}
 
@@ -355,7 +473,13 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent e) {
+	public void mouseClicked(MouseEvent e) { // Let go
+		int x = e.getX(), y = e.getY();
+
+		if (e.getButton() != MouseEvent.BUTTON1)
+			return;
+
+		buttons.stream().filter((button) -> button.contains(x, y)).forEach(Button::onClick);
 	}
 
 	@Override
@@ -385,7 +509,6 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 
 	@Override
 	public void windowOpened(WindowEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -397,31 +520,25 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 
 	@Override
 	public void windowClosed(WindowEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void windowIconified(WindowEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 }
