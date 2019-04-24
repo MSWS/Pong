@@ -94,8 +94,7 @@ public class Ball {
 
 		history.add(new HEntry(x, y, xVel, yVel));
 
-		int hSize = 10000;
-
+		int hSize = 2000;
 		if (history.size() > hSize)
 			for (int i = 0; i < history.size() - hSize; i++)
 				history.remove(i);
@@ -106,14 +105,16 @@ public class Ball {
 		for (Paddle paddle : paddles) {
 			if (x + width + Math.abs(xVel) >= paddle.getX()
 					&& x - Math.abs(xVel) <= paddle.getX() + paddle.getWidth()) {
-				if (y + height + yVel >= paddle.getY() && y - yVel <= paddle.getY() + paddle.getHeight()) {
+				if (y + height + Math.abs(yVel) >= paddle.getY()
+						&& y - Math.abs(yVel) <= paddle.getY() + paddle.getHeight()) {
 					// xVel = -xVel * ThreadLocalRandom.current().nextDouble(1.01, 1.04);
 					xVel = -xVel;
-					xVel += 1 / xVel / 5;
-					yVel = ((y + height / 2.0) - (paddle.getY() + paddle.getHeight() / 2.0)) / 2.0
+					xVel += 1 / xVel / 2;
+					yVel = ((y + height / 2.0) - (paddle.getY() + paddle.getHeight() / 2.0)) / 3.0
 							+ ThreadLocalRandom.current().nextDouble(-.25, .25);
 					width = (float) Math.max(10, width * .999);
 					height = (float) Math.max(10, height * .999);
+					System.out.println(Math.abs(xVel));
 					return true;
 				}
 			}

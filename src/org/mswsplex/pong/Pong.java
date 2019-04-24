@@ -58,7 +58,7 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 
 	private long startTime, lastFpsTime, lastRpsTime;
 
-	private float fps, lastFps, rps, lastRps; // Rallies Per Second
+	private double fps, lastFps, rps, lastRps; // Rallies Per Second
 
 	private boolean mousePressed = false;
 
@@ -375,16 +375,16 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 			repaint();
 			fps++;
 
-			long frameSampleTime = 2000, rallySampleTime = 5000;
+			long frameSampleTime = 5000, rallySampleTime = 10000;
 
 			if (System.currentTimeMillis() - lastFpsTime > frameSampleTime) {
-				lastFps = (float) (fps / (frameSampleTime / 1000.0));
+				lastFps = (double) (fps / (frameSampleTime / 1000.0));
 				fps = 0;
 				lastFpsTime = System.currentTimeMillis();
 			}
 
 			if (System.currentTimeMillis() - lastRpsTime > rallySampleTime) {
-				lastRps = (rps / (rallySampleTime / 1000));
+				lastRps = ((double) rps / (rallySampleTime / 1000));
 				rps = 0;
 				lastRpsTime = System.currentTimeMillis();
 			}
@@ -447,7 +447,7 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 				status = Status.MENU;
 			break;
 		case KeyEvent.VK_ESCAPE:
-			if (status != Status.PAUSE)
+			if (status != Status.PAUSE && status != Status.MENU)
 				break;
 			dispose();
 			System.exit(0);
