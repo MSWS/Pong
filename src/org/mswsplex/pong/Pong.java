@@ -20,6 +20,16 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.mswsplex.pong.buttons.Button;
 
+/**
+ * Pong is a classic arcade style game that goes back many many years. This is
+ * my personal rendition of it in Java, it supports 0-2 players with AI. Unlike
+ * some AI in many pong games, this AI (depending on its difficulty) can
+ * calculate where the ball will be by the time it gets to where it could be
+ * hit.
+ * 
+ * @author imodm
+ *
+ */
 public class Pong extends Frame implements Runnable, KeyListener, MouseListener, WindowListener {
 
 	ThreadLocalRandom rnd;
@@ -32,29 +42,40 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 	// Personal resolution is 1360:650
 
 	public static final int WIDTH = 1000, HEIGHT = 500;
+
+	// General font for most text, other text (subtext, descriptions, etc) should
+	// scale appropriately
 	public static final Font FONT = new Font("Consolas", Font.BOLD, 24);
 
+	// The main menu's buttons' coordinates and dimensions
 	int bWidth = WIDTH / 5, bHeight = HEIGHT / 10, buttonX = (int) (WIDTH * (5.0 / 10.0) - bWidth / 2);
 
+	// Locations of where each of the 3 buttons are
 	int singleY = (int) (HEIGHT * (2.0 / 10.0));
 	int multiY = (int) (HEIGHT * (4.0 / 10.0));
 	int aiY = (int) (HEIGHT * (6.0 / 10.0));
 
+	// Paddle dimensions
 	int pWidth = 70, pHeight = 15;
 
+	// Dividing by 4 places the paddle in the appropriate place (no idea why
+	// honestly)
 	// int hPlayerX = (int) ((WIDTH * (19.0 / 20.0)) - (pWidth / 2.0));
 	int hPlayerX = (int) (((WIDTH * (19.0 / 20.0))) - (pWidth / 4));
 
+	// List of active paddles
 	private Set<Paddle> paddles;
 
+	private BufferedImage img; // Image used to buffer rendering into one frame
 	private Graphics gfx;
-	private BufferedImage img;
 
 	private int p1Score = 0, p2Score = 0;
 
-	private Status status;
-
 	private int winner, hits;
+	// Winner: temporary variable to capture which player just scored
+	// Hits: number of volleys in current rally
+
+	private Status status; // Game's status
 
 	private long startTime, lastFpsTime, lastRpsTime;
 
@@ -66,6 +87,12 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 
 	private List<Button> buttons;
 
+	/**
+	 * Undecorated should be set to true otherwise certain pixels will be obstructed
+	 * from the person's view
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		Pong game = new Pong();
 		game.setSize(WIDTH, HEIGHT);
@@ -155,6 +182,13 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 		status = Status.MENU;
 	}
 
+	/**
+	 * Assigns paddle variables and inserts them into paddles
+	 * 
+	 * @param human
+	 * @throws IllegalArgumentException Thrown if human is not between 0-2
+	 *                                  (inclusive)
+	 */
 	public void registerPlayers(int human) throws IllegalArgumentException {
 		switch (human) {
 		case 0:
@@ -183,6 +217,12 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 		paddles.add(hPaddle);
 	}
 
+	/**
+	 * Registers a new button, the button's "onPress" will trigger automatically if
+	 * registered
+	 * 
+	 * @param button
+	 */
 	public void addButtonListener(Button button) {
 		buttons.add(button);
 	}
@@ -272,6 +312,12 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 		return status;
 	}
 
+	/**
+	 * Prints text including FPS, Scores, etc.
+	 * 
+	 * @param g
+	 * @return Number (0 if none) of player that has scored
+	 */
 	private int manageTextAndScores(Graphics g) {
 		g.setColor(Color.LIGHT_GRAY);
 		g.setFont(FONT.deriveFont(FONT.getSize() * .75f));

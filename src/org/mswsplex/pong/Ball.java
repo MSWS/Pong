@@ -107,14 +107,12 @@ public class Ball {
 					&& x - Math.abs(xVel) <= paddle.getX() + paddle.getWidth()) {
 				if (y + height + Math.abs(yVel) >= paddle.getY()
 						&& y - Math.abs(yVel) <= paddle.getY() + paddle.getHeight()) {
-					// xVel = -xVel * ThreadLocalRandom.current().nextDouble(1.01, 1.04);
 					xVel = -xVel;
 					xVel += 1 / xVel / 2;
 					yVel = ((y + height / 2.0) - (paddle.getY() + paddle.getHeight() / 2.0)) / 3.0
 							+ ThreadLocalRandom.current().nextDouble(-.25, .25);
 					width = (float) Math.max(10, width * .999);
 					height = (float) Math.max(10, height * .999);
-					System.out.println(Math.abs(xVel));
 					return true;
 				}
 			}
