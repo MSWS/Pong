@@ -77,7 +77,7 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 
 	private Status status; // Game's status
 
-	private long startTime, lastFpsTime, lastRpsTime;
+	private long lastFpsTime, lastRpsTime;
 
 	private double fps, lastFps, rps, lastRps; // Rallies Per Second
 
@@ -112,7 +112,6 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 		paddles = new HashSet<Paddle>();
 		buttons = new ArrayList<>();
 
-		startTime = System.currentTimeMillis();
 		lastFpsTime = System.currentTimeMillis();
 
 		ball = new Ball(this, 15, 15);
@@ -239,16 +238,16 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 			return;
 		}
 
-		if (status == Status.START) {
-			long time = System.currentTimeMillis() - startTime;
-
-			gfx.setColor(Color.cyan);
-			gfx.setFont(FONT.deriveFont((float) ((float) 5 + Math.sin((float) time / 500.0f)) * 10));
-			gfx.drawString("Press Enter To Start", WIDTH / 2 - (gfx.getFont().getSize() * 5), HEIGHT / 2);
-			gfx.setFont(FONT);
-			g.drawImage(img, 0, 0, this);
-			return;
-		}
+//		if (status == Status.START) {
+//			long time = System.currentTimeMillis() - startTime;
+//
+//			gfx.setColor(Color.cyan);
+//			gfx.setFont(FONT.deriveFont((float) ((float) 5 + Math.sin((float) time / 500.0f)) * 10));
+//			gfx.drawString("Press Enter To Start", WIDTH / 2 - (gfx.getFont().getSize() * 5), HEIGHT / 2);
+//			gfx.setFont(FONT);
+//			g.drawImage(img, 0, 0, this);
+//			return;
+//		}
 
 		drawLines(gfx);
 
@@ -475,7 +474,9 @@ public class Pong extends Frame implements Runnable, KeyListener, MouseListener,
 		switch (key.getKeyCode()) {
 		case KeyEvent.VK_ENTER:
 			switch (status) {
-			case START:
+//			case START:
+//				status = Status.MENU;
+//				break;
 			case SCORE:
 				ball.reset();
 			case PAUSE:
